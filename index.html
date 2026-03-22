@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Barça Live"/>
+<meta name="theme-color" content="#0a0a0f"/>
+<title>Barça Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#0a0a0f; --bg2:#13131a; --bg3:#1c1c26;
+  --barca-blue:#004D98; --barca-red:#A50044; --barca-gold:#EDBB00;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+  --text:#f0ede8; --text2:#8a8799; --text3:#4a4859;
+  --green:#2ecc8a; --green-bg:rgba(46,204,138,0.1);
+  --blue:#4a9eff; --blue-bg:rgba(74,158,255,0.1);
+  --red:#ff5252; --radius:14px; --radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:480px;margin:0 auto;padding-bottom:84px}
+.header{padding:52px 18px 14px;display:flex;align-items:flex-end;justify-content:space-between}
+.logo-wrap{display:flex;align-items:center;gap:10px}
+.logo-badge{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--barca-blue),var(--barca-red));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--barca-gold);flex-shrink:0}
+.header-title{font-size:22px;font-weight:600;letter-spacing:-0.4px}
+.header-sub{font-size:12px;color:var(--text2);margin-top:1px}
+.refresh-pill{display:flex;align-items:center;gap:5px;background:var(--green-bg);border:0.5px solid rgba(46,204,138,0.25);border-radius:99px;padding:5px 11px;font-size:11px;color:var(--green);font-weight:500;cursor:pointer}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.35;transform:scale(0.75)}}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(10,10,15,0.94);backdrop-filter:blur(24px);border-top:0.5px solid var(--border);display:flex;padding:7px 0 26px;z-index:100}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--text3);font-family:'DM Sans',sans-serif;font-size:10px;cursor:pointer;padding:5px 0;transition:color 0.2s}
+.nav-btn.active{color:var(--text)}
+.nav-icon{font-size:20px;line-height:1}
+.comp-tabs{padding:0 16px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:4px;padding-bottom:2px}
+.comp-tabs::-webkit-scrollbar{display:none}
+.comp-tab{white-space:nowrap;padding:5px 13px;border-radius:99px;font-size:12px;font-weight:500;border:0.5px solid var(--border);background:none;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;flex-shrink:0}
+.comp-tab.active{background:var(--bg3);color:var(--text);border-color:var(--border2)}
+.section{padding:0 16px;margin-bottom:24px}
+.section-label{font-size:10px;font-weight:500;letter-spacing:1.3px;color:var(--text3);text-transform:uppercase;margin-bottom:10px;padding:0 2px}
+.match-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:15px;margin-bottom:9px}
+.match-card.live-card{border-color:rgba(46,204,138,0.3)}
+.match-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}
+.competition-tag{font-size:11px;color:var(--text2);font-family:'DM Mono',monospace}
+.badge{font-size:10px;font-weight:500;padding:3px 9px;border-radius:99px}
+.badge-live{background:var(--green-bg);color:var(--green);border:0.5px solid rgba(46,204,138,0.3);display:flex;align-items:center;gap:4px}
+.badge-final{background:var(--bg3);color:var(--text2)}
+.badge-upcoming{background:var(--blue-bg);color:var(--blue)}
+.scoreline{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px}
+.team{display:flex;flex-direction:column;align-items:center;gap:6px}
+.team-name{font-size:12px;color:var(--text2);text-align:center;line-height:1.3}
+.team-logo{width:40px;height:40px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px}
+.team-logo.barca{background:linear-gradient(135deg,#003f7f,#8b0033)}
+.score-center{text-align:center}
+.score-nums{font-size:34px;font-weight:600;letter-spacing:-1px;font-family:'DM Mono',monospace}
+.score-time{font-size:11px;margin-top:2px}
+.score-time.live-t{color:var(--green)}
+.score-time.grey{color:var(--text3)}
+.events-btn{width:100%;background:none;border:none;border-top:0.5px solid var(--border);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:12px;padding:9px 0 0;margin-top:13px;cursor:pointer;display:flex;align-items:center;justify-content:space-between}
+.chevron{transition:transform 0.2s;display:inline-block}
+.chevron.open{transform:rotate(180deg)}
+.events-list{margin-top:8px;display:flex;flex-direction:column;gap:5px}
+.event-row{display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:var(--radius-sm);padding:7px 10px}
+.event-min{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;min-width:30px}
+.event-icon{font-size:14px;min-width:18px;text-align:center}
+.event-info{flex:1}
+.event-player{font-size:12px;font-weight:500}
+.event-detail{font-size:11px;color:var(--text2);margin-top:1px}
+.event-side{font-size:10px;color:var(--text3);text-align:right;max-width:72px;line-height:1.3}
+/* LaLiga tracker */
+.liga-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:18px;margin:0 16px 16px}
+.liga-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.liga-title{font-size:14px;font-weight:500}
+.liga-season{font-size:11px;color:var(--text2);font-family:'DM Mono',monospace}
+.standings-row{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:8px 10px;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px}
+.standings-row:last-child{border-bottom:none}
+.s-pos{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;min-width:16px;text-align:center}
+.s-name{font-weight:500}
+.s-pts{font-family:'DM Mono',monospace;font-size:14px;font-weight:600;text-align:right}
+.s-gd{font-size:11px;color:var(--text2);text-align:right}
+.s-played{font-size:11px;color:var(--text3);text-align:right}
+.s-name.barca-row{color:var(--barca-gold)}
+.s-name.madrid-row{color:#b0b0b0}
+.prob-section{margin-top:16px;padding-top:14px;border-top:0.5px solid var(--border)}
+.prob-label{font-size:11px;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.9px;font-weight:500}
+.prob-bar-wrap{margin-bottom:10px}
+.prob-bar-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.prob-bar-name{font-size:12px;font-weight:500}
+.prob-bar-pct{font-size:14px;font-weight:600;font-family:'DM Mono',monospace}
+.prob-bar-track{height:7px;background:var(--bg3);border-radius:99px;overflow:hidden}
+.prob-bar-fill{height:100%;border-radius:99px;transition:width 0.8s ease}
+.prob-bar-fill.barca{background:var(--barca-blue)}
+.prob-bar-fill.madrid{background:#888}
+.prob-note{font-size:11px;color:var(--text3);margin-top:10px;line-height:1.5}
+.games-left{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:0.5px solid var(--border)}
+.games-pill{flex:1;background:var(--bg3);border-radius:var(--radius-sm);padding:10px;text-align:center}
+.games-pill-num{font-size:20px;font-weight:600;font-family:'DM Mono',monospace}
+.games-pill-lbl{font-size:10px;color:var(--text2);margin-top:2px}
+/* Config */
+.setup-screen{padding:16px}
+.setup-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px}
+.setup-ttl{font-size:16px;font-weight:600;margin-bottom:7px}
+.setup-desc{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:14px}
+.setup-steps{display:flex;flex-direction:column;gap:9px;margin-bottom:18px}
+.s-step{display:flex;gap:9px}
+.sn{width:20px;height:20px;border-radius:50%;background:var(--bg3);border:0.5px solid var(--border2);font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;color:var(--text2);flex-shrink:0;margin-top:1px}
+.st{font-size:12px;color:var(--text);line-height:1.55}
+.st a{color:var(--blue);text-decoration:none}
+.api-row{display:flex;gap:7px}
+.api-inp{flex:1;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:9px 11px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;outline:none}
+.api-inp::placeholder{color:var(--text3)}
+.save-btn{background:var(--barca-blue);color:white;border:none;border-radius:var(--radius-sm);padding:9px 15px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.api-msg{font-size:11px;margin-top:7px;min-height:16px}
+.api-msg.ok{color:var(--green)}
+.api-msg.err{color:var(--red)}
+.empty{text-align:center;padding:36px 20px;color:var(--text3);font-size:13px}
+.empty-icon{font-size:36px;margin-bottom:10px}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.loading-bar{display:flex;align-items:center;gap:8px;padding:20px 18px;color:var(--text3);font-size:12px}
+.spin{width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:sp 0.8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.info-banner{background:var(--blue-bg);border:0.5px solid rgba(74,158,255,0.2);border-radius:var(--radius-sm);padding:10px 12px;font-size:11px;color:var(--blue);line-height:1.5;margin:0 16px 12px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-wrap">
+    <div class="logo-badge">B</div>
+    <div>
+      <div class="header-title">Barça Live</div>
+      <div class="header-sub" id="header-sub">FC Barcelona · Totes les competicions</div>
+    </div>
+  </div>
+  <div class="refresh-pill" onclick="refreshAll()"><span class="live-dot"></span><span id="live-label">Actualitza</span></div>
+</div>
+
+<!-- TAB: FUTBOL -->
+<div id="tab-futbol" class="tab-content active">
+  <div class="comp-tabs" id="football-comp-tabs">
+    <button class="comp-tab active" onclick="setFComp('all',this)">Tots</button>
+    <button class="comp-tab" onclick="setFComp('PD',this)">LaLiga</button>
+    <button class="comp-tab" onclick="setFComp('CL',this)">Champions</button>
+    <button class="comp-tab" onclick="setFComp('CDR',this)">Copa del Rey</button>
+  </div>
+  <div id="laliga-tracker"></div>
+  <div class="section">
+    <div class="section-label">Partits</div>
+    <div id="football-matches"><div class="loading-bar"><div class="spin"></div>Carregant...</div></div>
+  </div>
+</div>
+
+<!-- TAB: BÀSQUET -->
+<div id="tab-basquet" class="tab-content">
+  <div class="info-banner">🏀 Dades de bàsquet via TheSportsDB (gratuït, sense registre)</div>
+  <div class="section">
+    <div class="section-label">Partits Barça Basket</div>
+    <div id="basket-matches"><div class="loading-bar"><div class="spin"></div>Carregant...</div></div>
+  </div>
+</div>
+
+<!-- TAB: RESULTATS -->
+<div id="tab-results" class="tab-content">
+  <div class="section">
+    <div class="section-label">Últims resultats · Futbol</div>
+    <div id="football-results"><div class="loading-bar"><div class="spin"></div></div></div>
+  </div>
+  <div class="section">
+    <div class="section-label">Últims resultats · Bàsquet</div>
+    <div id="basket-results"><div class="loading-bar"><div class="spin"></div></div></div>
+  </div>
+</div>
+
+<!-- TAB: CONFIG -->
+<div id="tab-config" class="tab-content">
+  <div class="setup-screen">
+    <div class="setup-card">
+      <div class="setup-ttl">API Key · football-data.org</div>
+      <div class="setup-desc">
+        Aquesta API admet crides directes des del navegador (sense bloqueig CORS ni de IP). El pla gratuït inclou LaLiga, Champions League i Copa del Rey. <strong>No cal targeta de crèdit.</strong>
+      </div>
+      <div class="setup-steps">
+        <div class="s-step"><div class="sn">1</div><div class="st">Ves a <a href="https://www.football-data.org/client/register" target="_blank">football-data.org/client/register</a> i registra't amb el teu email</div></div>
+        <div class="s-step"><div class="sn">2</div><div class="st">Rebràs un email amb el teu <strong>Auth Token</strong> (una cadena de 32 caràcters)</div></div>
+        <div class="s-step"><div class="sn">3</div><div class="st">Enganxa el token aquí i prem Desar</div></div>
+      </div>
+      <div class="api-row">
+        <input class="api-inp" type="text" id="api-inp" placeholder="el teu token de 32 caràcters..."/>
+        <button class="save-btn" onclick="saveKey()">Desar</button>
+      </div>
+      <div class="api-msg" id="api-msg"></div>
+    </div>
+    <div class="setup-card">
+      <div class="setup-ttl">Per què football-data.org?</div>
+      <div class="setup-desc">
+        A diferència d'API-Sports, football-data.org no bloqueja IPs de proveïdors mòbils ni domèstics. Les crides es fan directament des del navegador sense necessitat de cap proxy.<br/><br/>
+        ⚽ <strong>Futbol:</strong> LaLiga · Champions League · Copa del Rey<br/>
+        🏀 <strong>Bàsquet:</strong> TheSportsDB (sense registre)
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="switchTab('futbol',this)"><span class="nav-icon">⚽</span>Futbol</button>
+  <button class="nav-btn" onclick="switchTab('basquet',this)"><span class="nav-icon">🏀</span>Bàsquet</button>
+  <button class="nav-btn" onclick="switchTab('results',this)"><span class="nav-icon">📋</span>Resultats</button>
+  <button class="nav-btn" onclick="switchTab('config',this)"><span class="nav-icon">⚙️</span>Config</button>
+</nav>
+
+<script>
+// ── IDs football-data.org ─────────────────────────────────────────
+const BARCA_ID   = 81;   // FC Barcelona a football-data.org
+const MADRID_ID  = 86;   // Real Madrid
+const COMPS = { PD:'LaLiga', CL:'Champions League', CDR:'Copa del Rey' };
+const COMP_CODES = ['PD','CL','CDR'];
+const TOTAL_MATCHES = 38;
+// TheSportsDB: Barça Basket ID
+const BARCA_BASKET_ID = '134846';
+
+let apiKey = localStorage.getItem('barcaFDKey') || '';
+let fCompFilter = 'all';
+let openEvs = new Set();
+let state = { fMatches:[], bMatches:[], laliga:null, lastUpdate:null };
+
+// ── API football-data.org ─────────────────────────────────────────
+// Aquesta API retorna Access-Control-Allow-Origin: * → no cal proxy
+async function fdApi(path) {
+  const r = await fetch('https://api.football-data.org/v4/' + path, {
+    headers: { 'X-Auth-Token': apiKey }
+  });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
+// ── API TheSportsDB (bàsquet, sense token) ────────────────────────
+async function sportsDb(path) {
+  const r = await fetch('https://www.thesportsdb.com/api/v1/json/3/' + path);
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
+// ── FETCH FUTBOL ──────────────────────────────────────────────────
+async function fetchFootball() {
+  const calls = COMP_CODES.map(code =>
+    fdApi(`competitions/${code}/matches?team=${BARCA_ID}&status=SCHEDULED,IN_PLAY,PAUSED,FINISHED&limit=5`)
+      .catch(() => null)
+  );
+  const results = await Promise.all(calls);
+  const all = [];
+  results.forEach(d => { if (d && d.matches) all.push(...d.matches); });
+  // Deduplicar
+  const seen = new Set();
+  return all.filter(m => { if (seen.has(m.id)) return false; seen.add(m.id); return true; });
+}
+
+async function fetchLaLiga() {
+  try {
+    const d = await fdApi('competitions/PD/standings');
+    return d.standings?.[0]?.table || null;
+  } catch { return null; }
+}
+
+// ── FETCH BÀSQUET (TheSportsDB) ───────────────────────────────────
+async function fetchBasket() {
+  try {
+    // Últims 5 partits + pròxims 5
+    const [last, next] = await Promise.all([
+      sportsDb(`eventslast.php?id=${BARCA_BASKET_ID}`),
+      sportsDb(`eventsnext.php?id=${BARCA_BASKET_ID}`)
+    ]);
+    const events = [];
+    if (last.results) events.push(...last.results);
+    if (next.events) events.push(...next.events);
+    return events;
+  } catch { return []; }
+}
+
+// ── PARSE FUTBOL ──────────────────────────────────────────────────
+function parseFoot(m) {
+  const s = m.status;
+  const isLive = s === 'IN_PLAY' || s === 'PAUSED' || s === 'HALFTIME';
+  const isDone = s === 'FINISHED';
+  const isBarca = id => id === BARCA_ID;
+  const score = m.score;
+  const goals = isDone || isLive
+    ? { h: score?.fullTime?.home ?? score?.halfTime?.home ?? 0,
+        a: score?.fullTime?.away ?? score?.halfTime?.away ?? 0 }
+    : null;
+  const events = (m.goals || []).map(g => ({
+    min: g.minute ? g.minute + "'" : '–',
+    type: g.type === 'OWN_GOAL' ? 'owngoal' : 'goal',
+    player: g.scorer?.name || '–',
+    detail: g.type === 'PENALTY' ? 'Penal' : g.type === 'OWN_GOAL' ? 'Gol en pròpia porta' : 'Gol',
+    team: g.team?.id === m.homeTeam.id ? 'home' : 'away'
+  }));
+  // Afegir targetes si disponibles
+  if (m.bookings) {
+    m.bookings.forEach(b => {
+      events.push({
+        min: b.minute + "'",
+        type: b.card === 'YELLOW_CARD' ? 'yellow' : b.card === 'RED_CARD' ? 'red' : 'yellow',
+        player: b.player?.name || '–',
+        detail: b.card === 'YELLOW_CARD' ? 'Targeta groga' : 'Targeta vermella',
+        team: b.team?.id === m.homeTeam.id ? 'home' : 'away'
+      });
+    });
+    events.sort((a, b) => parseInt(a.min) - parseInt(b.min));
+  }
+  return {
+    id: 'f' + m.id, sport: 'futbol', compCode: m.competition?.code || '',
+    status: isLive ? 'live' : isDone ? 'finished' : 'upcoming',
+    competition: m.competition?.name || '',
+    home: { id: m.homeTeam.id, name: m.homeTeam.shortName || m.homeTeam.name, isBarca: isBarca(m.homeTeam.id) },
+    away: { id: m.awayTeam.id, name: m.awayTeam.shortName || m.awayTeam.name, isBarca: isBarca(m.awayTeam.id) },
+    score: goals,
+    time: isLive ? (m.minute ? m.minute + "'" : 'En joc') : isDone ? 'Final' : fmtDate(m.utcDate),
+    events
+  };
+}
+
+function parseBasket(e) {
+  const isDone = e.strStatus === 'Match Finished' || e.intHomeScore !== null;
+  const isLive = e.strStatus === '1' || e.strProgress;
+  return {
+    id: 'b' + e.idEvent, sport: 'basquet',
+    status: isLive ? 'live' : isDone ? 'finished' : 'upcoming',
+    competition: e.strLeague || 'Bàsquet',
+    home: { id: e.idHomeTeam, name: e.strHomeTeam, isBarca: e.strHomeTeam?.includes('Barcelona') },
+    away: { id: e.idAwayTeam, name: e.strAwayTeam, isBarca: e.strAwayTeam?.includes('Barcelona') },
+    score: isDone ? { h: parseInt(e.intHomeScore)||0, a: parseInt(e.intAwayScore)||0 } : null,
+    time: isDone ? 'Final' : fmtDate(e.strTimestamp || e.dateEvent),
+    events: [] // TheSportsDB gratuït no dona detall d'anotadors per partits
+  };
+}
+
+function fmtDate(ds) {
+  try {
+    const d = new Date(ds);
+    return d.toLocaleString('ca-ES', { weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+  } catch { return '–'; }
+}
+
+// ── TITLE PROBABILITY ─────────────────────────────────────────────
+function calcProb(table) {
+  if (!table) return null;
+  const bR = table.find(r => r.team.id === BARCA_ID);
+  const mR = table.find(r => r.team.id === MADRID_ID);
+  if (!bR || !mR) return null;
+  const bPts = bR.points, mPts = mR.points;
+  const bLeft = TOTAL_MATCHES - bR.playedGames, mLeft = TOTAL_MATCHES - mR.playedGames;
+  const bForm = bR.won / (bR.playedGames || 1), mForm = mR.won / (mR.playedGames || 1);
+  const N = 20000; let bWins = 0;
+  for (let i = 0; i < N; i++) {
+    let bp = bPts, mp = mPts;
+    for (let j = 0; j < bLeft; j++) { const r = Math.random(); bp += r < bForm ? 3 : r < bForm + 0.22 ? 1 : 0; }
+    for (let j = 0; j < mLeft; j++) { const r = Math.random(); mp += r < mForm ? 3 : r < mForm + 0.22 ? 1 : 0; }
+    if (bp > mp) bWins++;
+  }
+  const bProb = Math.round(bWins / N * 100);
+  const mProb = Math.min(Math.round((N - bWins) / N * 100), 100 - bProb);
+  return { bPts, mPts, bPlayed: bR.playedGames, mPlayed: mR.playedGames,
+           bLeft, mLeft, diff: bPts - mPts, bProb, mProb,
+           bForm: Math.round(bForm * 100), mForm: Math.round(mForm * 100),
+           bGD: bR.goalDifference, mGD: mR.goalDifference, bPos: bR.position, mPos: mR.position };
+}
+
+function renderLaLigaTracker(table) {
+  const el = document.getElementById('laliga-tracker');
+  if ((fCompFilter !== 'all' && fCompFilter !== 'PD') || !table) { el.innerHTML = ''; return; }
+  const p = calcProb(table);
+  if (!p) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="liga-card">
+    <div class="liga-title-row">
+      <span class="liga-title">🏆 Cursa LaLiga 2025–26</span>
+      <span class="liga-season">J${p.bPlayed}/38</span>
+    </div>
+    <div class="standings-row">
+      <span class="s-pos">${p.bPos}</span>
+      <span class="s-name barca-row">🔵🔴 FC Barcelona</span>
+      <span class="s-played">${p.bPlayed}PJ</span>
+      <span class="s-gd">${p.bGD > 0 ? '+' : ''}${p.bGD}</span>
+      <span class="s-pts">${p.bPts}</span>
+    </div>
+    <div class="standings-row">
+      <span class="s-pos">${p.mPos}</span>
+      <span class="s-name madrid-row">⚪ Real Madrid</span>
+      <span class="s-played">${p.mPlayed}PJ</span>
+      <span class="s-gd">${p.mGD > 0 ? '+' : ''}${p.mGD}</span>
+      <span class="s-pts">${p.mPts}</span>
+    </div>
+    <div class="games-left">
+      <div class="games-pill">
+        <div class="games-pill-num" style="color:var(--barca-gold)">${p.diff > 0 ? '+' : ''}${p.diff}</div>
+        <div class="games-pill-lbl">diferència pts</div>
+      </div>
+      <div class="games-pill">
+        <div class="games-pill-num" style="color:var(--blue)">${p.bLeft}</div>
+        <div class="games-pill-lbl">jornades restants</div>
+      </div>
+      <div class="games-pill">
+        <div class="games-pill-num" style="color:var(--green)">${p.bLeft * 3}</div>
+        <div class="games-pill-lbl">punts en joc</div>
+      </div>
+    </div>
+    <div class="prob-section">
+      <div class="prob-label">Probabilitat de guanyar la lliga</div>
+      <div class="prob-bar-wrap">
+        <div class="prob-bar-label">
+          <span class="prob-bar-name" style="color:var(--barca-gold)">🔵🔴 FC Barcelona</span>
+          <span class="prob-bar-pct" style="color:var(--barca-gold)">${p.bProb}%</span>
+        </div>
+        <div class="prob-bar-track"><div class="prob-bar-fill barca" style="width:${p.bProb}%"></div></div>
+      </div>
+      <div class="prob-bar-wrap">
+        <div class="prob-bar-label">
+          <span class="prob-bar-name" style="color:#b0b0b0">⚪ Real Madrid</span>
+          <span class="prob-bar-pct" style="color:#b0b0b0">${p.mProb}%</span>
+        </div>
+        <div class="prob-bar-track"><div class="prob-bar-fill madrid" style="width:${p.mProb}%"></div></div>
+      </div>
+      <div class="prob-note">Simulació de 20.000 temporades basada en punts actuals, jornades restants i forma recent (${p.bForm}% victòries Barça / ${p.mForm}% Madrid).</div>
+    </div>
+  </div>`;
+}
+
+// ── RENDER ────────────────────────────────────────────────────────
+function icon(t) {
+  return { goal:'⚽', owngoal:'🔴', yellow:'🟨', red:'🟥', sub:'🔄', points:'🏀', foul:'✋' }[t] || '•';
+}
+
+function renderCard(m) {
+  const live = m.status === 'live', done = m.status === 'finished';
+  const badge = live
+    ? `<span class="badge badge-live"><span class="live-dot"></span>En directe</span>`
+    : done ? `<span class="badge badge-final">Final</span>`
+    : `<span class="badge badge-upcoming">${m.time}</span>`;
+  const scoreHtml = m.score
+    ? `<div class="score-nums">${m.score.h}&nbsp;–&nbsp;${m.score.a}</div><div class="score-time ${done ? 'grey' : 'live-t'}">${m.time}</div>`
+    : `<div style="font-size:16px;color:var(--text3)">–</div>`;
+  const hLogo = `<div class="team-logo${m.home.isBarca ? ' barca' : ''}">${m.home.isBarca ? 'B' : '🏟'}</div>`;
+  const aLogo = `<div class="team-logo${m.away.isBarca ? ' barca' : ''}">${m.away.isBarca ? 'B' : '🏟'}</div>`;
+  const evOpen = openEvs.has(m.id);
+  const evBtn = m.events && m.events.length > 0 ? `
+    <button class="events-btn" onclick="toggleEv('${m.id}')">
+      <span>${m.sport === 'futbol' ? '⚽' : '🏀'} Gols / Targetes (${m.events.length})</span>
+      <span class="chevron${evOpen ? ' open' : ''}">▾</span>
+    </button>
+    ${evOpen ? `<div class="events-list">${m.events.map(e => `
+      <div class="event-row">
+        <span class="event-min">${e.min}</span>
+        <span class="event-icon">${icon(e.type)}</span>
+        <div class="event-info"><div class="event-player">${e.player}</div><div class="event-detail">${e.detail}</div></div>
+        <span class="event-side">${e.team === 'home' ? m.home.name : m.away.name}</span>
+      </div>`).join('')}</div>` : ''}` : '';
+  return `<div class="match-card${live ? ' live-card' : ''}">
+    <div class="match-meta">${badge}<span class="competition-tag">${m.competition}</span></div>
+    <div class="scoreline">
+      <div class="team">${hLogo}<div class="team-name">${m.home.name}</div></div>
+      <div class="score-center">${scoreHtml}</div>
+      <div class="team">${aLogo}<div class="team-name">${m.away.name}</div></div>
+    </div>${evBtn}
+  </div>`;
+}
+
+function noApi() { return `<div class="empty"><div class="empty-icon">⚙️</div>Configura el token a ⚙️ Config per veure dades reals</div>`; }
+function noM(t) { return `<div class="empty"><div class="empty-icon">📡</div>${t}</div>`; }
+
+function renderFootball() {
+  const el = document.getElementById('football-matches');
+  if (!apiKey) { el.innerHTML = noApi(); return; }
+  const active = state.fMatches.filter(m => m.status !== 'finished');
+  const filtered = fCompFilter === 'all' ? active : active.filter(m => m.compCode === fCompFilter);
+  el.innerHTML = filtered.length > 0 ? filtered.map(renderCard).join('') : noM('Cap partit programat avui');
+}
+
+function renderBasket() {
+  const el = document.getElementById('basket-matches');
+  const active = state.bMatches.filter(m => m.status !== 'finished');
+  el.innerHTML = active.length > 0 ? active.map(renderCard).join('') : noM('Cap partit de bàsquet avui');
+}
+
+function renderResults() {
+  const fEl = document.getElementById('football-results');
+  const bEl = document.getElementById('basket-results');
+  if (!apiKey) { fEl.innerHTML = noApi(); } else {
+    const fDone = state.fMatches.filter(m => m.status === 'finished').slice(0, 5);
+    fEl.innerHTML = fDone.length > 0 ? fDone.map(renderCard).join('') : noM('Cap resultat recent de futbol');
+  }
+  const bDone = state.bMatches.filter(m => m.status === 'finished').slice(0, 5);
+  bEl.innerHTML = bDone.length > 0 ? bDone.map(renderCard).join('') : noM('Cap resultat recent de bàsquet');
+}
+
+// ── REFRESH ───────────────────────────────────────────────────────
+async function refreshAll() {
+  document.getElementById('live-label').textContent = 'Carregant...';
+  try {
+    // Bàsquet sempre (no necessita token)
+    const bRaw = await fetchBasket();
+    state.bMatches = bRaw.map(parseBasket);
+
+    if (apiKey) {
+      const [fRaw, laliga] = await Promise.all([fetchFootball(), fetchLaLiga()]);
+      state.fMatches = fRaw.map(parseFoot).sort((a, b) => {
+        const order = { live:0, upcoming:1, finished:2 };
+        return order[a.status] - order[b.status];
+      });
+      state.laliga = laliga;
+    }
+    state.lastUpdate = new Date();
+    const liveCount = state.fMatches.filter(m => m.status === 'live').length +
+                      state.bMatches.filter(m => m.status === 'live').length;
+    document.getElementById('live-label').textContent = liveCount > 0 ? liveCount + ' en directe' : 'Actualitzat';
+  } catch(e) {
+    document.getElementById('live-label').textContent = 'Error';
+    console.error(e);
+  }
+  renderLaLigaTracker(state.laliga);
+  renderFootball();
+  renderBasket();
+  renderResults();
+}
+
+// ── UI ────────────────────────────────────────────────────────────
+function toggleEv(id) { openEvs.has(id) ? openEvs.delete(id) : openEvs.add(id); renderFootball(); renderBasket(); renderResults(); }
+
+function setFComp(c, btn) {
+  fCompFilter = c;
+  document.querySelectorAll('#football-comp-tabs .comp-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLaLigaTracker(state.laliga);
+  renderFootball();
+}
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+function saveKey() {
+  const v = document.getElementById('api-inp').value.trim();
+  if (!v) { setMsg('Enganxa el token primer', false); return; }
+  apiKey = v; localStorage.setItem('barcaFDKey', v);
+  setMsg('Verificant...', null);
+  fdApi('competitions/PD').then(d => {
+    if (d.id) { setMsg('✓ Token vàlid · ' + (d.name || 'LaLiga OK'), true); refreshAll(); }
+    else setMsg('Token invàlid', false);
+  }).catch(e => setMsg('Error: ' + e.message, false));
+}
+
+function setMsg(t, ok) {
+  const el = document.getElementById('api-msg');
+  el.textContent = t;
+  el.className = 'api-msg ' + (ok === true ? 'ok' : ok === false ? 'err' : '');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+if (apiKey) document.getElementById('api-inp').value = apiKey;
+refreshAll();
+setInterval(() => refreshAll(), 60000);
+</script>
+</body>
+</html>
